@@ -15,81 +15,44 @@
     
     <script>
         let mediaRecorder;
-        let audioChunks = [];
+let audioChunks = [];
 
-        document.getElementById("upload").onclick = async function() {
-    let audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+function startRecording() {
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.start();
+        console.log("Recording started...");
 
-    let reader = new FileReader();
-    reader.readAsDataURL(audioBlob);
-    reader.onloadend = async function() {
-        let base64Data = reader.result.split(',')[1]; // Extract base64 data
-        
-        console.log("Sending data to Google Apps Script...", base64Data.slice(0, 30)); // Debugging (Prints only first 30 chars)
-
-        let response = await fetch("https://script.google.com/macros/s/AKfycbwB_p145yJgNIXk0Mlc2nRy9dQkqkP8-YeOlxP-z1YCMo_PjOhjmRYHAcQFbawUj70/exec", { 
-            method: "POST",
-            headers: { 
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ 
-                contents: base64Data, 
-                type: "audio/webm"
-            })
-        });
-
-        let result = await response.text();
-        console.log("Server response:", result); // Debugging
-        document.getElementById("status").innerText = "Upload successful: " + result;
-    };
-};
-
-
-            mediaRecorder.onstop = () => {
-                let audioBlob = new Blob(audioChunks, { type: "audio/webm" });
-                let audioUrl = URL.createObjectURL(audioBlob);
-                document.getElementById("audio").src = audioUrl;
-                document.getElementById("upload").disabled = false;
-            };
-
-            mediaRecorder.start();
-            document.getElementById("start").disabled = true;
-            document.getElementById("stop").disabled = false;
+        mediaRecorder.ondataavailable = event => {
+            audioChunks.push(event.data);
         };
 
-        document.getElementById("stop").onclick = function() {
-            mediaRecorder.stop();
-            document.getElementById("start").disabled = false;
-            document.getElementById("stop").disabled = true;
-        };
+        mediaRecorder.onstop = async () => {
+            console.log("Recording stopped.");
+            const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+            audioChunks = [];
 
-        document.getElementById("upload").onclick = async function() {
-            let audioBlob = new Blob(audioChunks, { type: "audio/webm" });
-
-            let reader = new FileReader();
+            // Convert to Base64
+            const reader = new FileReader();
             reader.readAsDataURL(audioBlob);
-            reader.onloadend = async function() {
-                let base64Data = reader.result.split(',')[1]; // Extract base64 data
-                
-                let response = await fetch("https://script.google.com/macros/s/AKfycbwPjnhSeVL0zHQNzsvu3VvrRTdDMvQP1yeWwdzIkJke3P4Jn1Ifaoe0fyejJPMEhXE/exec", { 
-                    method: "POST",
-                    headers: { 
-                        "Content-Type": "application/json" 
-                    },
-                    body: JSON.stringify({ 
-                        contents: base64Data, 
-                        type: "audio/webm" 
-                    })
-                });
-
-                let result = await response.text();
-                document.getElementById("status").innerText = "Upload successful: " + result;
+            reader.onloadend = () => {
+                const base64String = reader.result.split(",")[1]; // Get only Base64 data
+                console.log("Base64 Audio Ready:", base64String);
+                uploadAudio(base64String); // 🔥 Upload audio after recording stops
             };
         };
-    </script>
-    async function uploadAudio(base64String) {
+    }).catch(error => console.error("Error accessing microphone:", error));
+}
+
+function stopRecording() {
+    if (mediaRecorder) {
+        mediaRecorder.stop();
+    }
+}
+
+async function uploadAudio(base64String) {
     try {
-        const response = await fetch("YOUR_NEW_GOOGLE_APPS_SCRIPT_DEPLOYMENT_URL", {
+        const response = await fetch("https://script.google.com/macros/s/AKfycbwPjnhSeVL0zHQNzsvu3VvrRTdDMvQP1yeWwdzIkJke3P4Jn1Ifaoe0fyejJPMEhXE/exec", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -115,5 +78,6 @@
         alert("Upload failed! Check console for details.");
     }
 }
+
 </body>
 </html>

@@ -39,18 +39,25 @@
             document.getElementById("stop").disabled = true;
         };
 
-        document.getElementById("upload").onclick = async function() {
-            let audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
-            let formData = new FormData();
-            formData.append("audio", audioBlob, "recording.mp3");
-            
-            let response = await fetch("YOUR_GOOGLE_APPS_SCRIPT_URL", {
-                method: "POST",
-                body: formData
-            });
-            let result = await response.text();
-            document.getElementById("status").innerText = result;
-        };
+       document.getElementById("upload").onclick = async function() {
+    let audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+
+    let formData = new FormData();
+    formData.append("audio", audioBlob, "recording.mp3");
+
+    let response = await fetch("https://script.google.com/macros/s/AKfycbwsJ_M6s0isivzLU7Nd61qdY-SF-gvIzpbjh1pAne_B7WqdYl1SPUMGfB-89elh1YA/exec", {
+        method: "POST",
+        body: formData
+    });
+
+    if (response.ok) {
+        let result = await response.text();
+        document.getElementById("status").innerText = "Upload successful: " + result;
+    } else {
+        document.getElementById("status").innerText = "Upload failed!";
+    }
+};
+
     </script>
 </body>
 </html>

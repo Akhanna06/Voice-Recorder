@@ -14,53 +14,42 @@
     <p id="status"></p>
     
     <script>
-        let mediaRecorder;
-        let audioChunks = [];
+    let mediaRecorder;
+    let audioChunks = [];
 
-       document.getElementById("upload").onclick = async function() {
-    let audioBlob = new Blob(audioChunks, { type: "audio/mp3" });
-
-    let formData = new FormData();
-    formData.append("audio", audioBlob, "recording.mp3");
-
-    let response = await fetch("YOUR_GOOGLE_APPS_SCRIPT_URL", {
-        method: "POST",
-        body: formData
-    });
-
-    if (response.ok) {
-        let result = await response.text();
-        document.getElementById("status").innerText = "Upload successful: " + result;
-    } else {
-        document.getElementById("status").innerText = "Upload failed!";
-    }
-};
-
-
-        document.getElementById("stop").onclick = function() {
-            mediaRecorder.stop();
-            document.getElementById("start").disabled = false;
-            document.getElementById("stop").disabled = true;
+    document.getElementById("start").onclick = async function () {
+        let stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = function (event) {
+            audioChunks.push(event.data);
+            document.getElementById("upload").disabled = false;
         };
+        mediaRecorder.start();
+        document.getElementById("start").disabled = true;
+        document.getElementById("stop").disabled = false;
+    };
 
-       document.getElementById("upload").onclick = async function() {
-    let audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+    document.getElementById("stop").onclick = function () {
+        mediaRecorder.stop();
+        document.getElementById("start").disabled = false;
+        document.getElementById("stop").disabled = true;
+    };
 
-    let formData = new FormData();
-    formData.append("audio", audioBlob, "recording.mp3");
+    document.getElementById("upload").onclick = async function () {
+        let audioBlob = new Blob(audioChunks, { type: "audio/mp3" });
 
-    let response = await fetch("https://script.google.com/macros/s/AKfycbxE-nbxCY01_B7MfBxhF6YkGhAoqjjpRFXDNAY0-V1hz90teZmGKZBakkeIwX5Z/exec", {
-        method: "POST",
-        body: formData
-    });
+        let formData = new FormData();
+        formData.append("audio", audioBlob, "recording.mp3");
 
-    if (response.ok) {
+        let response = await fetch("https://script.google.com/macros/s/AKfycbxE-nbxCY01_B7MfBxhF6YkGhAoqjjpRFXDNAY0-V1hz90teZmGKZBakkeIwX5Z/exec", {
+            method: "POST",
+            body: formData
+        });
+
         let result = await response.text();
-        document.getElementById("status").innerText = "Upload successful: " + result;
-    } else {
-        document.getElementById("status").innerText = "Upload failed!";
-    }
-};
+        document.getElementById("status").innerText = response.ok ? "Upload successful: " + result : "Upload failed!";
+    };
+</script>
 
     </script>
 </body>

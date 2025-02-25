@@ -17,21 +17,24 @@
         let mediaRecorder;
         let audioChunks = [];
 
-        document.getElementById("start").onclick = async function() {
-            let stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream);
-            mediaRecorder.start();
-            audioChunks = [];
-            mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
-            mediaRecorder.onstop = () => {
-                let audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
-                let audioUrl = URL.createObjectURL(audioBlob);
-                document.getElementById("audio").src = audioUrl;
-                document.getElementById("upload").disabled = false;
-            };
-            document.getElementById("start").disabled = true;
-            document.getElementById("stop").disabled = false;
-        };
+        document.getElementById("upload").onclick = async function() {
+    let audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+
+    let response = await fetch("YOUR_GOOGLE_APPS_SCRIPT_URL", {
+        method: "POST",
+        headers: {
+            "Content-Type": "audio/mp3"
+        },
+        body: audioBlob
+    });
+
+    if (response.ok) {
+        let result = await response.text();
+        document.getElementById("status").innerText = "Upload successful: " + result;
+    } else {
+        document.getElementById("status").innerText = "Upload failed!";
+    }
+};
 
         document.getElementById("stop").onclick = function() {
             mediaRecorder.stop();

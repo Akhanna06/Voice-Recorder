@@ -19,7 +19,7 @@
 
         document.getElementById("start").onclick = async function() {
             let stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
             audioChunks = [];
 
             mediaRecorder.ondataavailable = event => {
@@ -27,7 +27,7 @@
             };
 
             mediaRecorder.onstop = () => {
-                let audioBlob = new Blob(audioChunks, { type: "audio/mp3" });
+                let audioBlob = new Blob(audioChunks, { type: "audio/webm" });
                 let audioUrl = URL.createObjectURL(audioBlob);
                 document.getElementById("audio").src = audioUrl;
                 document.getElementById("upload").disabled = false;
@@ -45,22 +45,22 @@
         };
 
         document.getElementById("upload").onclick = async function() {
-            let audioBlob = new Blob(audioChunks, { type: "audio/mp3" });
+            let audioBlob = new Blob(audioChunks, { type: "audio/webm" });
 
-            let formData = new FormData();
-            formData.append("audio", audioBlob, "recording.mp3");
+            let reader = new FileReader();
+            reader.readAsDataURL(audioBlob);
+            reader.onloadend = async function() {
+                let base64Data = reader.result.split(',')[1]; // Extract base64 data
+                
+                let response = await fetch("https://script.google.com/macros/s/AKfycbz2Fj7e_D3iuTfN75tiESESSeoDV8gRFkdICPWSpl9hNs3UekggfaJhU7YoaX7Utg/exec", { 
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ contents: base64Data, type: "audio/webm" })
+                });
 
-            let response = await fetch("https://script.google.com/macros/s/AKfycbwPJF7E_NZpb9O8lkih70qmB6gLQsfb0DbB7ow4mIvERUv52lpPSCg1FlG-HE3tk7M/exec", {
-                method: "POST",
-                body: formData
-            });
-
-            if (response.ok) {
                 let result = await response.text();
                 document.getElementById("status").innerText = "Upload successful: " + result;
-            } else {
-                document.getElementById("status").innerText = "Upload failed!";
-            }
+            };
         };
     </script>
 </body>

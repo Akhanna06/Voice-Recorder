@@ -52,7 +52,7 @@
             reader.onloadend = async function() {
                 let base64Data = reader.result.split(',')[1]; // Extract base64 data
                 
-                let response = await fetch("https://script.google.com/macros/s/AKfycbz2Fj7e_D3iuTfN75tiESESSeoDV8gRFkdICPWSpl9hNs3UekggfaJhU7YoaX7Utg/exec", { 
+                let response = await fetch("https://script.google.com/macros/s/AKfycbx0SMHW0fdRe96V6yFgUkTQ-xxJEzQFqkjP5_ZcjTwHh998zPa_a7XdnbRbFIt_Aw/exec", { 
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ contents: base64Data, type: "audio/webm" })

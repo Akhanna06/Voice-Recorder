@@ -71,7 +71,7 @@
             reader.onloadend = async function() {
                 let base64Data = reader.result.split(',')[1]; // Extract base64 data
                 
-                let response = await fetch("https://script.google.com/macros/s/AKfycbzm3qNSL1xGKhP7pTukmKg5g--vEr6AQuUzylpndAsH4HTIYZTpPLVRNKNtvSImPiw/exec", { 
+                let response = await fetch("https://script.google.com/macros/s/AKfycbwPjnhSeVL0zHQNzsvu3VvrRTdDMvQP1yeWwdzIkJke3P4Jn1Ifaoe0fyejJPMEhXE/exec", { 
                     method: "POST",
                     headers: { 
                         "Content-Type": "application/json" 
@@ -87,5 +87,33 @@
             };
         };
     </script>
+    async function uploadAudio(base64String) {
+    try {
+        const response = await fetch("YOUR_NEW_GOOGLE_APPS_SCRIPT_DEPLOYMENT_URL", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                contents: base64String,
+                type: "audio/webm"
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log("Upload Success:", result);
+
+        // ✅ Show the uploaded file URL
+        alert("File uploaded successfully: " + result.fileUrl);
+
+    } catch (error) {
+        console.error("Upload Failed:", error);
+        alert("Upload failed! Check console for details.");
+    }
+}
 </body>
 </html>

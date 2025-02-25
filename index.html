@@ -45,7 +45,7 @@
     let formData = new FormData();
     formData.append("audio", audioBlob, "recording.mp3");
 
-    let response = await fetch("https://script.google.com/macros/s/AKfycbypGjPLxwwmQKJ7bBrtvRowVWC_qCVQrLlvopqFbDfPsIPrjO5mpAPHgan2oNeDuoY/exec", {
+    let response = await fetch("https://script.google.com/macros/s/AKfycbw8o4KVP3QyCHIhJFi9bgLj9WpZzaJaBsylJojaCErGhjJFednEigUEyah_BAh9Svw/exec", {
         method: "POST",
         body: formData
     });
